@@ -23,29 +23,28 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 	byte pwrdInvWoolColor;
 	byte pwrNodeWoolColor;
 	int maxGridSize;
-	int maxMechSize;
 
 	@Override
 	public void onEnable()
 	{
 		log = this.getLogger();
-		getServer().getPluginManager().registerEvents(this, this);
-
+		
 		unpwrdWoolColor = DyeColor.WHITE.getData();
 		pwrdWoolColor = DyeColor.YELLOW.getData();
 		unpwrdInvWoolColor = DyeColor.PURPLE.getData();
 		pwrdInvWoolColor = DyeColor.PINK.getData();
 		pwrNodeWoolColor = DyeColor.BROWN.getData();
 		maxGridSize = 1000;
-		maxMechSize = 5;
 
-		log.info("Your plugin has been enabled!");
+		getServer().getPluginManager().registerEvents(this, this);
+		
+		log.info("Enabled.");
 	}
 
 	@Override
 	public void onDisable()
 	{
-		log.info("Your plugin has been disabled.");
+		log.info("Disabled.");
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -66,10 +65,10 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 
 	public void changeGridState(Block baseBlock, Boolean state)
 	{
-		ArrayList<Block> grid = new ArrayList<Block>(1000);
-		ArrayList<Block> mechs = new ArrayList<Block>(1000);
-		ArrayList<Block> invmechs = new ArrayList<Block>(1000);
-		grid.add(baseBlock);		
+		ArrayList<Block> grid = new ArrayList<Block>(maxGridSize);
+		ArrayList<Block> mechs = new ArrayList<Block>();
+		ArrayList<Block> invmechs = new ArrayList<Block>();
+		grid.add(baseBlock);
 
 		for (int i = 0; i < grid.size(); i++)
 		{
