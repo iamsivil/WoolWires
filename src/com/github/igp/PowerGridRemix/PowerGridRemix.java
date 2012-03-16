@@ -28,16 +28,17 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 	public void onEnable()
 	{
 		log = this.getLogger();
-		
+
 		unpwrdWoolColor = DyeColor.WHITE.getData();
 		pwrdWoolColor = DyeColor.YELLOW.getData();
 		unpwrdInvWoolColor = DyeColor.PURPLE.getData();
 		pwrdInvWoolColor = DyeColor.PINK.getData();
 		pwrNodeWoolColor = DyeColor.BROWN.getData();
+
 		maxGridSize = 1000;
 
 		getServer().getPluginManager().registerEvents(this, this);
-		
+
 		log.info("Enabled.");
 	}
 
@@ -48,26 +49,25 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
-	public void onBlockRedstoneChanged(BlockRedstoneEvent event)
+	public void onBlockRedstoneChanged(final BlockRedstoneEvent event)
 	{
-		Block sourceBlock = event.getBlock();
-		Block baseBlock = sourceBlock.getRelative(BlockFace.DOWN);
+		final Block sourceBlock = event.getBlock();
+		final Block baseBlock = sourceBlock.getRelative(BlockFace.DOWN);
 
-		if ((baseBlock.getType() == Material.WOOL) && (baseBlock.getData() == pwrNodeWoolColor) && (sourceBlock.getType() == Material.REDSTONE_WIRE))
+		if ((baseBlock.getType() == Material.WOOL) && (sourceBlock.getType() == Material.REDSTONE_WIRE) || (baseBlock.getData() == pwrNodeWoolColor))
 		{
 			if (event.getNewCurrent() == 0)
 				changeGridState(baseBlock, false);
 			else
 				changeGridState(baseBlock, true);
 		}
-
 	}
 
-	public void changeGridState(Block baseBlock, Boolean state)
+	public void changeGridState(final Block baseBlock, final Boolean state)
 	{
-		ArrayList<Block> grid = new ArrayList<Block>(maxGridSize);
-		ArrayList<Block> mechs = new ArrayList<Block>();
-		ArrayList<Block> invmechs = new ArrayList<Block>();
+		final ArrayList<Block> grid = new ArrayList<Block>(maxGridSize);
+		final ArrayList<Block> mechs = new ArrayList<Block>();
+		final ArrayList<Block> invmechs = new ArrayList<Block>();
 		grid.add(baseBlock);
 
 		for (int i = 0; i < grid.size(); i++)
@@ -78,9 +78,10 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 			{
 				if (grid.size() > (maxGridSize))
 					break;
-				Block b = grid.get(i).getRelative(Faces[f]);
+				final Block b = grid.get(i).getRelative(Faces[f]);
 				if ((b.getType() != Material.WOOL) || (b.getData() == pwrNodeWoolColor))
-					continue;
+					continue;					
+
 				if (!grid.contains(b))
 					grid.add(b);
 			}
@@ -89,7 +90,7 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 
 		for (int i = 1; i < grid.size(); i ++)
 		{
-			Block b = grid.get(i);
+			final Block b = grid.get(i);
 
 			if (state)
 			{
@@ -108,7 +109,7 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 
 			for (int f = 0; f < Faces.length; f++)
 			{
-				Block mb = b.getRelative(Faces[f]);
+				final Block mb = b.getRelative(Faces[f]);
 
 				if (!(mechs.contains(mb)) && !(invmechs.contains(mb)))
 				{
@@ -120,14 +121,14 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 			}
 		}
 
-		for (Block b : mechs)
+		for (final Block b : mechs)
 			changeMechanismState(b, state);
 
-		for (Block b : invmechs)
+		for (final Block b : invmechs)
 			changeMechanismState(b, !state);
 	}
 
-	public void changeMechanismState(Block mechanism, Boolean state)
+	public void changeMechanismState(final Block mechanism, final Boolean state)
 	{
 		if (mechanism.getType() == Material.LEVER)
 		{
