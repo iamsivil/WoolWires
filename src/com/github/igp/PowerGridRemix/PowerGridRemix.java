@@ -15,13 +15,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PowerGridRemix extends JavaPlugin implements Listener 
 {	
-	Logger log;
+	private Logger log;
 
-	byte unpwrdWoolColor;
-	byte pwrdWoolColor;
-	byte unpwrdInvWoolColor;
-	byte pwrdInvWoolColor;
-	byte pwrNodeWoolColor;
+	byte inputColor;
+
 	int maxGridSize;
 
 	@Override
@@ -29,11 +26,7 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 	{
 		log = this.getLogger();
 
-		unpwrdWoolColor = DyeColor.WHITE.getData();
-		pwrdWoolColor = DyeColor.YELLOW.getData();
-		unpwrdInvWoolColor = DyeColor.PURPLE.getData();
-		pwrdInvWoolColor = DyeColor.PINK.getData();
-		pwrNodeWoolColor = DyeColor.BROWN.getData();
+		inputColor = DyeColor.BROWN.getData();
 
 		maxGridSize = 1000;
 
@@ -52,126 +45,48 @@ public class PowerGridRemix extends JavaPlugin implements Listener
 	public void onBlockRedstoneChanged(final BlockRedstoneEvent event)
 	{
 		final Block sourceBlock = event.getBlock();
-		final Block baseBlock = sourceBlock.getRelative(BlockFace.DOWN);
+		final Block inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+		final Boolean state;
 
-		if ((baseBlock.getType() == Material.WOOL) && (sourceBlock.getType() == Material.REDSTONE_WIRE) || (baseBlock.getData() == pwrNodeWoolColor))
+		if (!((inputBlock.getType() != Material.WOOL) || (inputBlock.getData() != inputColor)))
 		{
-			if (event.getNewCurrent() == 0)
-				changeGridState(baseBlock, false);
-			else
-				changeGridState(baseBlock, true);
+
+			if (event.getNewCurrent() == 0) { state = false; }
+			else { state = true; }
+
+			changeGridState(inputBlock, state);
 		}
 	}
 
-	public void changeGridState(final Block baseBlock, final Boolean state)
+	public void changeGridState(final Block inputBlock, final Boolean state)
 	{
-		final ArrayList<Block> grid = new ArrayList<Block>(maxGridSize);
-		final ArrayList<Block> mechs = new ArrayList<Block>();
-		final ArrayList<Block> invmechs = new ArrayList<Block>();
-		grid.add(baseBlock);
+		final ArrayList<WoolWire> wires = new ArrayList<WoolWire>(5);
 
-		for (int i = 0; i < grid.size(); i++)
+		for (final BlockFace f : Faces)
 		{
-			if (grid.size() > (maxGridSize))
-				break;
-			for (int f = 0; f < Faces.length; f++)
+			final Block b = inputBlock.getRelative(f);
+			Boolean exists = false;
+
+			if ((b.getType() != Material.WOOL) || (b.getData() == inputColor))
+				continue;
+
+			for (final WoolWire wire : wires)
 			{
-				if (grid.size() > (maxGridSize))
-					break;
-				final Block b = grid.get(i).getRelative(Faces[f]);
-				if ((b.getType() != Material.WOOL) || (b.getData() == pwrNodeWoolColor))
-					continue;					
-
-				if (!grid.contains(b))
-					grid.add(b);
-			}
-
-		}
-
-		for (int i = 1; i < grid.size(); i ++)
-		{
-			final Block b = grid.get(i);
-
-			if (state)
-			{
-				if (b.getData() == unpwrdWoolColor)
-					b.setData(pwrdWoolColor);
-				else if (b.getData() == pwrdInvWoolColor) 
-					b.setData(unpwrdInvWoolColor);
-			}
-			else
-			{
-				if (b.getData() == pwrdWoolColor) 
-					b.setData(unpwrdWoolColor);
-				else if (b.getData() == unpwrdInvWoolColor) 
-					b.setData(pwrdInvWoolColor);
-			}
-
-			for (int f = 0; f < Faces.length; f++)
-			{
-				final Block mb = b.getRelative(Faces[f]);
-
-				if (!(mechs.contains(mb)) && !(invmechs.contains(mb)))
+				if ((wire.getColor() == b.getData()) && (wire.contains(b)))
 				{
-					if ((b.getData() != unpwrdInvWoolColor) && (b.getData() != pwrdInvWoolColor))
-						mechs.add(mb);
-					else
-						invmechs.add(mb);
+					exists = true;
+					break;
 				}
 			}
+
+			if (exists)
+				continue;
+
+			wires.add(new WoolWire(b, this));
 		}
 
-		for (final Block b : mechs)
-			changeMechanismState(b, state);
-
-		for (final Block b : invmechs)
-			changeMechanismState(b, !state);
-	}
-
-	public void changeMechanismState(final Block mechanism, final Boolean state)
-	{
-		if (mechanism.getType() == Material.LEVER)
-		{
-			if (state)
-			{
-				if (mechanism.getData() < 8)
-					mechanism.setData((byte) (mechanism.getData() + 0x8));
-			}
-			else
-			{
-				if (mechanism.getData() > 7)
-					mechanism.setData((byte) (mechanism.getData() - 0x8));
-			}
-			return;
-		}
-
-		if ((mechanism.getType() == Material.FENCE_GATE) || mechanism.getType() == Material.TRAP_DOOR)
-		{
-			if (state)
-			{
-				if (mechanism.getData() < 4)
-					mechanism.setData((byte) (mechanism.getData() + 0x4));
-			}
-			else
-			{
-				if (mechanism.getData() > 3)
-					mechanism.setData((byte) (mechanism.getData() - 0x4));
-			}
-			return;
-		}
-
-		if (mechanism.getType() == Material.GLOWSTONE)
-		{
-			if (!state)
-				mechanism.setType(Material.GLASS);
-			return;
-		}
-		if (mechanism.getType() == Material.GLASS)
-		{			
-			if (state)
-				mechanism.setType(Material.GLOWSTONE);
-			return;
-		}	
+		for (final WoolWire wire : wires)
+			wire.setMechanismState(state);
 	}
 
 	public BlockFace[] Faces =
