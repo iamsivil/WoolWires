@@ -7,7 +7,7 @@ public class Faces {
 			BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
 	};
 
-	public static BlockFace[] getValidFaces() {
+	public final static BlockFace[] getValidFaces() {
 		return faces;
 	}
 }
