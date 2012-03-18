@@ -16,6 +16,7 @@ public class WWBlockListener implements Listener {
 	private final JavaPlugin plugin;
 	// temp
 	private final byte inputColor = DyeColor.BROWN.getData();
+
 	//
 
 	public WWBlockListener(final JavaPlugin plugin) {
@@ -33,8 +34,8 @@ public class WWBlockListener implements Listener {
 			if ((event.getNewCurrent() == 0) && (event.getOldCurrent() != 0)) {
 				state = false;
 				changeWireState(inputBlock, state);
-			} else if ((event.getNewCurrent() != 0)
-					&& (event.getOldCurrent() == 0)) {
+			}
+			else if ((event.getNewCurrent() != 0) && (event.getOldCurrent() == 0)) {
 				state = true;
 				changeWireState(inputBlock, state);
 			}

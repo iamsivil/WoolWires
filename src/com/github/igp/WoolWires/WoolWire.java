@@ -32,8 +32,7 @@ public class WoolWire {
 			for (final BlockFace f : Faces.getValidFaces()) {
 				final Block b = wire.get(i).getRelative(f);
 
-				if ((b.getType() == Material.WOOL) && (b.getData() == color)
-						&& (!wire.contains(b))) {
+				if ((b.getType() == Material.WOOL) && (b.getData() == color) && (!wire.contains(b))) {
 					wire.add(b);
 				}
 			}
@@ -56,8 +55,7 @@ public class WoolWire {
 			for (final BlockFace f : Faces.getValidFaces()) {
 				final Block mb = b.getRelative(f);
 
-				if ((validMechanisms.contains(mb.getType()))
-						&& (!mechanisms.contains(mb)))
+				if ((validMechanisms.contains(mb.getType())) && (!mechanisms.contains(mb)))
 					mechanisms.add(mb);
 			}
 		}
@@ -81,8 +79,7 @@ public class WoolWire {
 				continue;
 			}
 
-			if ((b.getType() == Material.FENCE_GATE)
-					|| b.getType() == Material.TRAP_DOOR) {
+			if ((b.getType() == Material.FENCE_GATE) || b.getType() == Material.TRAP_DOOR) {
 				if (!state)
 					newData = data & 0x3;
 				else
