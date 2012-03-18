@@ -22,4 +22,11 @@
   	<connection>git://github.com/IGP/WoolWires.git</connection>
   	<developerConnection>git@github.com:IGP/WoolWires.git</developerConnection>
   </scm>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.bukkit</groupId>
+  		<artifactId>bukkit</artifactId>
+  		<version>1.2.3-R0.3-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
 </project>
