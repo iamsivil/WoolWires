@@ -1,26 +1,31 @@
 package com.github.igp.WoolWires;
 
 import java.util.ArrayList;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.NoteBlock;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.github.igp.WoolWires.WWConfiguration.WireConfiguration;
 
 public class WoolWire {
 	private final Block baseBlock;
-	private final byte color;
 	private final ArrayList<Block> wire;
 	private final ArrayList<Block> mechanisms;
+	private final WireConfiguration wConfig;
+	private final byte color;
 
-	public WoolWire(final Block baseBlock, final JavaPlugin plugin) {
+	public WoolWire(final Block baseBlock, final WireConfiguration wConfig) {
 		this.baseBlock = baseBlock;
-		this.color = baseBlock.getData();
+		this.wConfig = wConfig;
 		wire = new ArrayList<Block>();
 		mechanisms = new ArrayList<Block>();
+
+		if (wConfig.getColor() == ((byte) 24))
+			color = baseBlock.getData();
+		else
+			color = wConfig.getColor();
 
 		wire.add(baseBlock);
 		findWire();
@@ -32,8 +37,7 @@ public class WoolWire {
 			for (final BlockFace f : Faces.getValidFaces()) {
 				final Block b = wire.get(i).getRelative(f);
 
-				if ((b.getType() == Material.WOOL) && (b.getData() == color)
-						&& (!wire.contains(b))) {
+				if ((b.getType() == Material.WOOL) && (b.getData() == color) && (!wire.contains(b))) {
 					wire.add(b);
 				}
 			}
@@ -41,29 +45,20 @@ public class WoolWire {
 	}
 
 	private void findMechanisms() {
-		final ArrayList<Material> validMechanisms = new ArrayList<Material>(7);
-		// temp
-		validMechanisms.add(Material.LEVER);
-		validMechanisms.add(Material.FENCE_GATE);
-		validMechanisms.add(Material.TRAP_DOOR);
-		validMechanisms.add(Material.GLOWSTONE);
-		validMechanisms.add(Material.GLASS);
-		validMechanisms.add(Material.NOTE_BLOCK);
-		validMechanisms.add(Material.DISPENSER);
-		//
-
 		for (final Block b : wire) {
 			for (final BlockFace f : Faces.getValidFaces()) {
 				final Block mb = b.getRelative(f);
 
-				if ((validMechanisms.contains(mb.getType()))
-						&& (!mechanisms.contains(mb)))
+				if ((wConfig.getAllowedMaterials().contains(mb.getType())) && (!mechanisms.contains(mb)))
 					mechanisms.add(mb);
 			}
 		}
 	}
 
-	public void setMechanismState(final Boolean state) {
+	public void setMechanismState(Boolean state) {
+		if (wConfig.getType() == 1)
+			state = !state;
+
 		for (final Block b : mechanisms) {
 			final BlockState bs = b.getState();
 			final byte data = b.getData();
@@ -81,8 +76,7 @@ public class WoolWire {
 				continue;
 			}
 
-			if ((b.getType() == Material.FENCE_GATE)
-					|| b.getType() == Material.TRAP_DOOR) {
+			if ((b.getType() == Material.FENCE_GATE) || b.getType() == Material.TRAP_DOOR) {
 				if (!state)
 					newData = data & 0x3;
 				else
@@ -130,10 +124,6 @@ public class WoolWire {
 
 	public byte getColor() {
 		return color;
-	}
-
-	public DyeColor getDyeColor() {
-		return DyeColor.getByData(color);
 	}
 
 	public Boolean contains(final Block block) {

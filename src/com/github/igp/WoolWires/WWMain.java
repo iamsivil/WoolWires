@@ -7,16 +7,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class WWMain extends JavaPlugin {
 	private Logger log;
 	private WWBlockListener blockListener;
-
-	byte inputColor;
-
-	int maxGridSize;
+	private WWConfiguration wwConfig;
 
 	@Override
 	public void onEnable() {
 		log = this.getLogger();
-
-		blockListener = new WWBlockListener(this);
+		wwConfig = new WWConfiguration(this);
+		blockListener = new WWBlockListener(this, wwConfig);
 
 		getServer().getPluginManager().registerEvents(blockListener, this);
 

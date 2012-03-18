@@ -2,7 +2,6 @@ package com.github.igp.WoolWires;
 
 import java.util.ArrayList;
 
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -13,13 +12,10 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WWBlockListener implements Listener {
-	private final JavaPlugin plugin;
-	// temp
-	private final byte inputColor = DyeColor.BROWN.getData();
-	//
+	private final WWConfiguration wwConfig;
 
-	public WWBlockListener(final JavaPlugin plugin) {
-		this.plugin = plugin;
+	public WWBlockListener(final JavaPlugin plugin, final WWConfiguration wwConfig) {
+		this.wwConfig = wwConfig;
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -28,13 +24,13 @@ public class WWBlockListener implements Listener {
 		final Block inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
 		final Boolean state;
 
-		if (!((inputBlock.getType() != Material.WOOL) || (inputBlock.getData() != inputColor))) {
+		if (!((inputBlock.getType() != Material.WOOL) || (inputBlock.getData() != wwConfig.getInputColor()))) {
 
 			if ((event.getNewCurrent() == 0) && (event.getOldCurrent() != 0)) {
 				state = false;
 				changeWireState(inputBlock, state);
-			} else if ((event.getNewCurrent() != 0)
-					&& (event.getOldCurrent() == 0)) {
+			}
+			else if ((event.getNewCurrent() != 0) && (event.getOldCurrent() == 0)) {
 				state = true;
 				changeWireState(inputBlock, state);
 			}
@@ -48,7 +44,7 @@ public class WWBlockListener implements Listener {
 			final Block b = inputBlock.getRelative(f);
 			Boolean exists = false;
 
-			if ((b.getType() != Material.WOOL) || (b.getData() == inputColor))
+			if ((b.getType() != Material.WOOL) || (b.getData() == wwConfig.getInputColor()))
 				continue;
 
 			for (final WoolWire wire : wires) {
@@ -61,7 +57,7 @@ public class WWBlockListener implements Listener {
 			if (exists)
 				continue;
 
-			wires.add(new WoolWire(b, plugin));
+			wires.add(new WoolWire(b, wwConfig.getWireConfig(b.getData())));
 		}
 
 		for (final WoolWire wire : wires)
