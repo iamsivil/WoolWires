@@ -45,7 +45,7 @@ public class WWBlockListener implements Listener {
 	public void changeWireState(final Block inputBlock, final Boolean state) {
 		final ArrayList<WoolWire> wires = new ArrayList<WoolWire>(5);
 
-		for (final BlockFace f : Faces.getValidFaces()) {
+		for (final BlockFace f : Faces.getAdjacentFaces()) {
 			final Block b = inputBlock.getRelative(f);
 			Boolean exists = false;
 

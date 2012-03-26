@@ -16,12 +16,26 @@ public class WoolWire {
 	private final ArrayList<Block> wire;
 	private final ArrayList<Block> mechanisms;
 
+	// temp
+	final ArrayList<Material> validMechanisms = new ArrayList<Material>(7);
+	//
+	
 	public WoolWire(final Block baseBlock, final JavaPlugin plugin) {
 		this.baseBlock = baseBlock;
 		this.color = baseBlock.getData();
 		wire = new ArrayList<Block>();
 		mechanisms = new ArrayList<Block>();
 
+		// temp
+		validMechanisms.add(Material.LEVER);
+		validMechanisms.add(Material.FENCE_GATE);
+		validMechanisms.add(Material.TRAP_DOOR);
+		validMechanisms.add(Material.GLOWSTONE);
+		validMechanisms.add(Material.GLASS);
+		validMechanisms.add(Material.NOTE_BLOCK);
+		validMechanisms.add(Material.DISPENSER);
+		//
+		
 		wire.add(baseBlock);
 		findWire();
 		findMechanisms();
@@ -29,7 +43,7 @@ public class WoolWire {
 
 	private void findWire() {
 		for (int i = 0; i < wire.size(); i++) {
-			for (final BlockFace f : Faces.getValidFaces()) {
+			for (final BlockFace f : Faces.getAdjacentFaces()) {
 				final Block b = wire.get(i).getRelative(f);
 
 				if ((b.getType() == Material.WOOL) && (b.getData() == color) && (!wire.contains(b))) {
@@ -40,19 +54,11 @@ public class WoolWire {
 	}
 
 	private void findMechanisms() {
-		final ArrayList<Material> validMechanisms = new ArrayList<Material>(7);
-		// temp
-		validMechanisms.add(Material.LEVER);
-		validMechanisms.add(Material.FENCE_GATE);
-		validMechanisms.add(Material.TRAP_DOOR);
-		validMechanisms.add(Material.GLOWSTONE);
-		validMechanisms.add(Material.GLASS);
-		validMechanisms.add(Material.NOTE_BLOCK);
-		validMechanisms.add(Material.DISPENSER);
-		//
+		
+
 
 		for (final Block b : wire) {
-			for (final BlockFace f : Faces.getValidFaces()) {
+			for (final BlockFace f : Faces.getAdjacentFaces()) {
 				final Block mb = b.getRelative(f);
 
 				if ((validMechanisms.contains(mb.getType())) && (!mechanisms.contains(mb)))
