@@ -26,9 +26,6 @@
 #                            Dispenser, (Glass, Glowstone)                    #
 #                                                                             #
 #  -------------------------------------------------------------------------  #
-# DO NOT CHANGE ConfigVersion!                                                #
-ConfigVersion: '0.1'
-
 InputColor: Brown
 Wires:
     Default:
