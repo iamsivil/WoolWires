@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.material.DetectorRail;
 import org.bukkit.material.Lever;
 import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.PressurePlate;
 import org.bukkit.material.RedstoneWire;
 import org.bukkit.material.RedstoneTorch;
 import org.bukkit.block.Block;
@@ -41,10 +43,10 @@ public class WWBlockListener implements Listener
 			state = true;
 		else
 			return;
-		
+
 		final Block sourceBlock = event.getBlock();
 		final Block inputBlock;
-		
+
 		if (sourceBlock.getType().equals(Material.LEVER))
 			inputBlock = sourceBlock.getRelative(((Lever) sourceBlock.getState().getData()).getAttachedFace());
 		else if (sourceBlock.getType().equals(Material.REDSTONE_TORCH_ON) || sourceBlock.getType().equals(Material.REDSTONE_TORCH_OFF))
@@ -53,26 +55,30 @@ public class WWBlockListener implements Listener
 			inputBlock = sourceBlock.getRelative(((Button) sourceBlock.getState().getData()).getAttachedFace());
 		else if (sourceBlock.getType().equals(Material.REDSTONE_WIRE))
 			inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+		else if (sourceBlock.getType().equals(Material.WOOD_PLATE) || sourceBlock.getType().equals(Material.STONE_PLATE))
+			inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+		else if (sourceBlock.getType().equals(Material.DETECTOR_RAIL))
+			inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
 		else
 			return;
-		
+
 		if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == inputColor)))
 			return;
-		
+
 		final List<Block> secondarySourceBlocks = new ArrayList<Block>(6);
-		
-		for (BlockFace f : BlockFaces.getAdjacentFaces())
+
+		for (final BlockFace f : BlockFaces.getAdjacentFaces())
 		{
-			Block b = inputBlock.getRelative(f);
-			
+			final Block b = inputBlock.getRelative(f);
+
 			if (!b.equals(sourceBlock))
 			{
 				if (b.getType().equals(Material.LEVER) || b.getType().equals(Material.STONE_BUTTON) || b.getType().equals(Material.REDSTONE_WIRE) || b.getType().equals(Material.REDSTONE_TORCH_ON) || b.getType().equals(Material.REDSTONE_TORCH_OFF))
 					secondarySourceBlocks.add(b);
 			}
 		}
-		
-		for (Block b : secondarySourceBlocks)
+
+		for (final Block b : secondarySourceBlocks)
 		{
 			if (b.getType().equals(Material.REDSTONE_WIRE))
 			{
@@ -83,8 +89,26 @@ public class WWBlockListener implements Listener
 				}
 			}
 			
-			MaterialData md = b.getState().getData();
+			if (b.getType().equals(Material.WOOD_PLATE) || b.getType().equals(Material.STONE_PLATE))
+			{
+				if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
+				{
+					if (((PressurePlate) b.getState().getData()).isPressed())
+						return;
+				}
+			}
 			
+			if (b.getType().equals(Material.DETECTOR_RAIL))
+			{
+				if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
+				{
+					if (((DetectorRail) b.getState().getData()).isPressed())
+						return;
+				}
+			}
+
+			final MaterialData md = b.getState().getData();
+
 			if (b.getType().equals(Material.LEVER))
 			{
 				if (b.getRelative(((Lever) md).getAttachedFace()).equals(inputBlock))
@@ -93,7 +117,7 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-			
+
 			if (b.getType().equals(Material.STONE_BUTTON))
 			{
 				if (b.getRelative(((Button) md).getAttachedFace()).equals(inputBlock))
@@ -102,7 +126,7 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-			
+
 			if (b.getType().equals(Material.REDSTONE_TORCH_ON) || b.getType().equals(Material.REDSTONE_TORCH_OFF))
 			{
 				if (b.getRelative(((RedstoneTorch) md).getAttachedFace()).equals(inputBlock))
@@ -111,10 +135,9 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-			
-			
+
 		}
-		
+
 		changeWireState(inputBlock, state);
 	}
 

@@ -8,6 +8,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.NoteBlock;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.material.Door;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WoolWire
@@ -22,6 +23,7 @@ public class WoolWire
 	// temp
 	final ArrayList<Material> validMechanisms = new ArrayList<Material>(7);
 	private final byte inputColor = DyeColor.BROWN.getData();
+
 	//
 
 	public WoolWire(final Block baseBlock, final JavaPlugin plugin)
@@ -69,8 +71,8 @@ public class WoolWire
 		{
 			for (final BlockFace f : BlockFaces.getAdjacentFaces())
 			{
-				final Block mb = b.getRelative(f);				
-				
+				final Block mb = b.getRelative(f);
+
 				if (mb.getRelative(BlockFace.DOWN).getType().equals(Material.WOOL) && (mb.getRelative(BlockFace.DOWN).getData() == inputColor))
 					continue;
 				
@@ -79,22 +81,25 @@ public class WoolWire
 			}
 		}
 	}
-	
+
 	private Boolean serverInteract(final Block b, final Boolean state)
 	{
 		Boolean blockState = null;
-		
+
 		if (b.getType().equals(Material.LEVER))
-			blockState = (b.getData() & 0x8) != 0;
+			blockState = (b.getData() & 8) != 0;
+
+		if (b.getType().equals(Material.TRAP_DOOR))
+			blockState = (b.getData() & 4) != 0;
 		
-		if (b.getType().equals(Material.TRAP_DOOR) || b.getType().equals(Material.WOODEN_DOOR))
-			blockState = (b.getData() & 0x4) != 0;
+		if (b.getType().equals(Material.WOODEN_DOOR) && !((Door) b.getState().getData()).isTopHalf())
+			blockState = (b.getData() & 4) != 0;	
 		
 		if (blockState != null)
 		{
 			if (blockState != state)
-				net.minecraft.server.Block.byId[b.getType().getId()].interact(((CraftWorld)b.getWorld()).getHandle(), b.getX(), b.getY(), b.getZ(), null);
-			
+				net.minecraft.server.Block.byId[b.getType().getId()].interact(((CraftWorld) b.getWorld()).getHandle(), b.getX(), b.getY(), b.getZ(), null);
+
 			return true;
 		}
 		return false;
@@ -103,14 +108,14 @@ public class WoolWire
 	public void setMechanismState(final Boolean state)
 	{
 		for (final Block b : mechanisms)
-		{
+		{			
 			if (serverInteract(b, state))
 				continue;
-			
+
 			if (b.getType().equals(Material.FENCE_GATE))
 			{
 				final byte data = b.getData();
-				final int newData = (byte)(state ? (data | 0x4) : (data & 0x3));
+				final int newData = (byte) (state ? (data | 4) : (data & ~4));
 				if (newData != data)
 					b.setData((byte) newData, true);
 
