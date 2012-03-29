@@ -20,9 +20,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.igp.IGHelpers.BlockFaces;
+
 public class WWBlockListener implements Listener
 {
 	private final JavaPlugin plugin;
+	private WWConfiguration config;
 	// temp
 	private final byte inputColor = DyeColor.BROWN.getData();
 
@@ -31,6 +34,7 @@ public class WWBlockListener implements Listener
 	public WWBlockListener(final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
+		config = new WWConfiguration(plugin);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

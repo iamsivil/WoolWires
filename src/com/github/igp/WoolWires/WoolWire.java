@@ -11,6 +11,8 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.material.Door;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.igp.IGHelpers.BlockFaces;
+
 public class WoolWire
 {
 	@SuppressWarnings("unused")
