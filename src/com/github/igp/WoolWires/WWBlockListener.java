@@ -3,7 +3,6 @@ package com.github.igp.WoolWires;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.material.DetectorRail;
 import org.bukkit.material.Lever;
@@ -20,21 +19,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGHelpers.BlockFaces;
+import com.github.igp.IGHelpers.BlockFaceHelper;
 
 public class WWBlockListener implements Listener
 {
 	private final JavaPlugin plugin;
 	private WWConfiguration config;
-	// temp
-	private final byte inputColor = DyeColor.BROWN.getData();
-
-	//
+	private final BlockFaceHelper blockFaceHelper;
 
 	public WWBlockListener(final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
 		config = new WWConfiguration(plugin);
+		blockFaceHelper = new BlockFaceHelper();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -66,12 +63,12 @@ public class WWBlockListener implements Listener
 		else
 			return;
 
-		if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == inputColor)))
+		if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
 			return;
 
 		final List<Block> secondarySourceBlocks = new ArrayList<Block>(6);
 
-		for (final BlockFace f : BlockFaces.getAdjacentFaces())
+		for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
 		{
 			final Block b = inputBlock.getRelative(f);
 
@@ -149,12 +146,12 @@ public class WWBlockListener implements Listener
 	{
 		final ArrayList<WoolWire> wires = new ArrayList<WoolWire>(5);
 
-		for (final BlockFace f : BlockFaces.getAdjacentFaces())
+		for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
 		{
 			final Block b = inputBlock.getRelative(f);
 			Boolean exists = false;
 
-			if (!b.getType().equals(Material.WOOL) || (b.getData() == inputColor))
+			if (!b.getType().equals(Material.WOOL) || (b.getData() == config.getInputColor()))
 				continue;
 
 			for (final WoolWire wire : wires)
@@ -169,7 +166,7 @@ public class WWBlockListener implements Listener
 			if (exists)
 				continue;
 
-			wires.add(new WoolWire(b, plugin));
+			wires.add(new WoolWire(b, config.getWireConfiguration(b.getData()), plugin));
 		}
 
 		for (final WoolWire wire : wires)

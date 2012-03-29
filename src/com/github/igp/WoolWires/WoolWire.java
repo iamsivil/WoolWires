@@ -8,10 +8,13 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.NoteBlock;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.material.Button;
 import org.bukkit.material.Door;
+import org.bukkit.material.Lever;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGHelpers.BlockFaces;
+import com.github.igp.IGHelpers.BlockFaceHelper;
+import com.github.igp.WoolWires.WWConfiguration.WireConfiguration;
 
 public class WoolWire
 {
@@ -21,31 +24,20 @@ public class WoolWire
 	private final byte color;
 	private final ArrayList<Block> wire;
 	private final ArrayList<Block> mechanisms;
+	private final BlockFaceHelper blockFaceHelper;
+	private final WireConfiguration config;
+	private int size;
 
-	// temp
-	final ArrayList<Material> validMechanisms = new ArrayList<Material>(7);
-	private final byte inputColor = DyeColor.BROWN.getData();
-
-	//
-
-	public WoolWire(final Block baseBlock, final JavaPlugin plugin)
+	public WoolWire(final Block baseBlock, final WireConfiguration config, final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
+		blockFaceHelper = new BlockFaceHelper();
 		this.baseBlock = baseBlock;
 		this.color = baseBlock.getData();
+		this.config = config;
 		wire = new ArrayList<Block>();
 		mechanisms = new ArrayList<Block>();
-
-		// temp
-		validMechanisms.add(Material.LEVER);
-		validMechanisms.add(Material.FENCE_GATE);
-		validMechanisms.add(Material.TRAP_DOOR);
-		validMechanisms.add(Material.GLOWSTONE);
-		validMechanisms.add(Material.GLASS);
-		validMechanisms.add(Material.NOTE_BLOCK);
-		validMechanisms.add(Material.DISPENSER);
-		validMechanisms.add(Material.WOODEN_DOOR);
-		//
+		size = 0;
 
 		wire.add(baseBlock);
 		findWire();
@@ -56,12 +48,15 @@ public class WoolWire
 	{
 		for (int i = 0; i < wire.size(); i++)
 		{
-			for (final BlockFace f : BlockFaces.getAdjacentFaces())
+			for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
 			{
 				final Block b = wire.get(i).getRelative(f);
 
-				if (b.getType().equals(Material.WOOL) && (b.getData() == color) && !wire.contains(b))
+				if (b.getType().equals(Material.WOOL) && (b.getData() == color) && !wire.contains(b) && (size < (config.getMaxSize() - 1)))
+				{
 					wire.add(b);
+					size++;
+				}
 			}
 		}
 	}
@@ -71,14 +66,26 @@ public class WoolWire
 
 		for (final Block b : wire)
 		{
-			for (final BlockFace f : BlockFaces.getAdjacentFaces())
+			for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
 			{
 				final Block mb = b.getRelative(f);
 
-				if (mb.getRelative(BlockFace.DOWN).getType().equals(Material.WOOL) && (mb.getRelative(BlockFace.DOWN).getData() == inputColor))
+				if (mb.getType().equals(Material.LEVER))
+				{
+					Block attached = mb.getRelative(((Lever) mb.getState().getData()).getAttachedFace());
+					if (attached.getType().equals(Material.WOOL) && (attached.getData() == config.getInputColor()))
+						continue;
+				}
+				else if (mb.getType().equals(Material.STONE_BUTTON))
+				{
+					Block attached = mb.getRelative(((Button) mb.getState().getData()).getAttachedFace());
+					if (attached.getType().equals(Material.WOOL) && (attached.getData() == config.getInputColor()))
+						continue;
+				}
+				else if (mb.getRelative(BlockFace.DOWN).getType().equals(Material.WOOL) && (mb.getRelative(BlockFace.DOWN).getData() == config.getInputColor()))
 					continue;
 				
-				if (validMechanisms.contains(mb.getType()) && !mechanisms.contains(mb))
+				if (config.getValidMechanisms().contains(mb.getType()) && !mechanisms.contains(mb))
 					mechanisms.add(mb);
 			}
 		}
@@ -107,8 +114,11 @@ public class WoolWire
 		return false;
 	}
 
-	public void setMechanismState(final Boolean state)
+	public void setMechanismState(boolean state)
 	{
+		if (config.getType() == 1)
+			state = !state;
+		
 		for (final Block b : mechanisms)
 		{			
 			if (serverInteract(b, state))

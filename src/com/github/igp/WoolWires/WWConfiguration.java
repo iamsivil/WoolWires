@@ -9,18 +9,22 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.igp.IGHelpers.MaterialHelper;
+
 public class WWConfiguration
 {
 	@SuppressWarnings("unused")
 	private final JavaPlugin plugin;
+	private final MaterialHelper materialHelper;
 	private final FileConfiguration config;
 	private List<WireConfiguration> wireConfigs;
 	private WireConfiguration defaultWireConfiguration;
-	private byte inputColor;
+	private Byte inputColor;
 	
 	public WWConfiguration(final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
+		materialHelper = new MaterialHelper();
 		
 		final File configFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "config.yml");
 		if ((configFile == null) || !configFile.exists())
@@ -30,7 +34,6 @@ public class WWConfiguration
 		}
 		
 		config = plugin.getConfig();
-		
 		load();
 	}
 	
@@ -39,44 +42,82 @@ public class WWConfiguration
 		wireConfigs = new ArrayList<WireConfiguration>();
 		
 		inputColor = stringToColor(config.getString("InputColor"));
+		if (inputColor == null)
+			inputColor = stringToColor("brown");
 		
 		{
 			final byte color = -1;
 			final int type = config.getInt("Wires.Default.Type");
 			final int maxSize = config.getInt("Wires.Default.MaxSize");
-			final List<Material> validMechanisms = new ArrayList<Material>();
+			List<Material> validMechanisms = new ArrayList<Material>(8);
 			if (config.getString("Wires.Default.Allowed").equalsIgnoreCase("ALL"))
-			{
-				validMechanisms.add(Material.LEVER);
-				validMechanisms.add(Material.FENCE_GATE);
-				validMechanisms.add(Material.TRAP_DOOR);
-				validMechanisms.add(Material.GLOWSTONE);
-				validMechanisms.add(Material.GLASS);
-				validMechanisms.add(Material.NOTE_BLOCK);
-				validMechanisms.add(Material.DISPENSER);
-				validMechanisms.add(Material.WOODEN_DOOR);
-			}
+				validMechanisms = defaultValidMechanisms();
 			else
 			{
 				for (String s : config.getStringList("Wires.Default.Allowed"))
 				{
-					Material mat = null;
-					try
-					{
-					mat = Material.getMaterial(Integer.parseInt(s));
-					}
-					catch (final NumberFormatException ex)
-					{
-					}
+					Material material = materialHelper.getMaterialFromString(s);
+					if ((material != null) && !validMechanisms.contains(material))
+						validMechanisms.add(material);					
+				}	
+			}
+			if (validMechanisms.size() == 0)
+				validMechanisms = defaultValidMechanisms();
+			defaultWireConfiguration = new WireConfiguration(color, type, maxSize, validMechanisms);		
+		}
+		
+		for (String s : config.getConfigurationSection("Wires").getKeys(false))
+		{
+			if (s.equalsIgnoreCase("Default"))
+				continue;
+			
+			final Byte color = stringToColor(s);
+			if ((color == null) || (color == inputColor))
+				continue;
+			boolean toContinue = false;
+			for (WireConfiguration wc : wireConfigs)
+			{
+				if (wc.getColor() == color)
+				{
+					toContinue = true;
+					continue;
+				}
+			}
+			if (toContinue)
+				continue;
+			
+			Integer type = config.getInt("Wires." + s + ".Type");
+			if (type == null)
+				type = defaultWireConfiguration.getType();	
+			
+			Integer maxSize = config.getInt("Wires." + s + ".MaxSize");
+			if (maxSize == null)
+				maxSize = defaultWireConfiguration.getMaxSize();
+			
+			List<Material> validMechanisms = new ArrayList<Material>(8);
+			if (config.getString("Wires." + s + ".Allowed").equalsIgnoreCase("ALL"))
+				validMechanisms = defaultValidMechanisms();
+			else
+			{
+				for (String sm : config.getStringList("Wires." + s + ".Allowed"))
+				{
 					
-					if (mat == null)
-						mat = Material.getMaterial(s);
-					
+					Material material = materialHelper.getMaterialFromString(sm);
+					if ((material != null) && !validMechanisms.contains(material))
+						validMechanisms.add(material);					
 				}	
 			}
 			
+			if (validMechanisms.size() == 0)
+				validMechanisms = defaultWireConfiguration.getValidMechanisms();
+			
+			wireConfigs.add(new WireConfiguration(color, type, maxSize, validMechanisms));
 		}
-		
+	}
+	
+	public byte getInputColor()
+	{
+		return inputColor;
 	}
 	
 	public WireConfiguration getWireConfiguration(final byte color)
@@ -94,13 +135,13 @@ public class WWConfiguration
 		private final byte color;
 		private final int type;
 		private final int maxSize;
-		private final List<Material> allowedMaterials;
+		private final List<Material> validMechanisms;
 
-		WireConfiguration(final byte color, final int type, final int maxSize, final ArrayList<Material> allowedMaterials) {
+		WireConfiguration(final byte color, final int type, final int maxSize, final List<Material> validMechanisms) {
 			this.color = color;
 			this.type = type;
 			this.maxSize = maxSize;
-			this.allowedMaterials = allowedMaterials;
+			this.validMechanisms = validMechanisms;
 		}
 
 		public final byte getColor() {
@@ -112,8 +153,8 @@ public class WWConfiguration
 			return inputColor;
 		}
 		
-		public final List<Material> getAllowedMaterials() {
-			return allowedMaterials;
+		public final List<Material> getValidMechanisms() {
+			return validMechanisms;
 		}
 
 		public final int getType() {
@@ -123,6 +164,22 @@ public class WWConfiguration
 		public final int getMaxSize() {
 			return maxSize;
 		}
+	}
+	
+	private final List<Material> defaultValidMechanisms()
+	{
+		List<Material> validMechanisms = new ArrayList<Material>(8);
+		
+		validMechanisms.add(Material.LEVER);
+		validMechanisms.add(Material.FENCE_GATE);
+		validMechanisms.add(Material.TRAP_DOOR);
+		validMechanisms.add(Material.GLOWSTONE);
+		validMechanisms.add(Material.GLASS);
+		validMechanisms.add(Material.NOTE_BLOCK);
+		validMechanisms.add(Material.DISPENSER);
+		validMechanisms.add(Material.WOODEN_DOOR);
+		
+		return validMechanisms;
 	}
 
 	private final Byte stringToColor(final String string)

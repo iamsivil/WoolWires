@@ -17,23 +17,14 @@
 #    <color>: same functionality as default except it overrides default.      #
 #                                                                             #
 #  -------------------------------------------------------------------------  #
-#                                                                             #
-# Valid Colors: White, Orange, Magenta, Light_Blue, Yellow, Lime, Pink,       #
-#               (Gray, Grey), (Light_Gray, Light_Grey, Silver), Cyan, Purple, #
-#               Blue, Brown, Green, Red, Black                                #
-#                                                                             #
-# Valid Controllable Blocks: Lever, Fence_Gate, Trap_Door, Note_Block         #
-#                            Dispenser, (Glass, Glowstone)                    #
-#                                                                             #
-#  -------------------------------------------------------------------------  #
 InputColor: Brown
 Wires:
     Default:
-        MaxSize: '1024'
-        Type: '0'
+        MaxSize: 1024
+        Type: 0
         Allowed: All
     Orange:
-        Type: '1'
+        Type: 1
         Allowed:
             - Glowstone
             - Glass
