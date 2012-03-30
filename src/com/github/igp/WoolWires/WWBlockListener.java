@@ -24,7 +24,7 @@ import com.github.igp.IGHelpers.BlockFaceHelper;
 public class WWBlockListener implements Listener
 {
 	private final JavaPlugin plugin;
-	private WWConfiguration config;
+	private final WWConfiguration config;
 	private final BlockFaceHelper blockFaceHelper;
 
 	public WWBlockListener(final JavaPlugin plugin)
@@ -89,7 +89,7 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-			
+
 			if (b.getType().equals(Material.WOOD_PLATE) || b.getType().equals(Material.STONE_PLATE))
 			{
 				if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
@@ -98,7 +98,7 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-			
+
 			if (b.getType().equals(Material.DETECTOR_RAIL))
 			{
 				if (b.getRelative(BlockFace.DOWN).equals(inputBlock))

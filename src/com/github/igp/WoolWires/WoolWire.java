@@ -22,11 +22,11 @@ public class WoolWire
 	private final JavaPlugin plugin;
 	private final Block baseBlock;
 	private final byte color;
+	private int size;
 	private final ArrayList<Block> wire;
 	private final ArrayList<Block> mechanisms;
 	private final BlockFaceHelper blockFaceHelper;
 	private final WireConfiguration config;
-	private int size;
 
 	public WoolWire(final Block baseBlock, final WireConfiguration config, final JavaPlugin plugin)
 	{
@@ -37,7 +37,7 @@ public class WoolWire
 		this.config = config;
 		wire = new ArrayList<Block>();
 		mechanisms = new ArrayList<Block>();
-		size = 0;
+		size = 1;
 
 		wire.add(baseBlock);
 		findWire();
@@ -52,7 +52,7 @@ public class WoolWire
 			{
 				final Block b = wire.get(i).getRelative(f);
 
-				if (b.getType().equals(Material.WOOL) && (b.getData() == color) && !wire.contains(b) && (size < (config.getMaxSize() - 1)))
+				if (b.getType().equals(Material.WOOL) && (b.getData() == color) && !wire.contains(b) && (size < config.getMaxSize()))
 				{
 					wire.add(b);
 					size++;
@@ -72,19 +72,19 @@ public class WoolWire
 
 				if (mb.getType().equals(Material.LEVER))
 				{
-					Block attached = mb.getRelative(((Lever) mb.getState().getData()).getAttachedFace());
+					final Block attached = mb.getRelative(((Lever) mb.getState().getData()).getAttachedFace());
 					if (attached.getType().equals(Material.WOOL) && (attached.getData() == config.getInputColor()))
 						continue;
 				}
 				else if (mb.getType().equals(Material.STONE_BUTTON))
 				{
-					Block attached = mb.getRelative(((Button) mb.getState().getData()).getAttachedFace());
+					final Block attached = mb.getRelative(((Button) mb.getState().getData()).getAttachedFace());
 					if (attached.getType().equals(Material.WOOL) && (attached.getData() == config.getInputColor()))
 						continue;
 				}
 				else if (mb.getRelative(BlockFace.DOWN).getType().equals(Material.WOOL) && (mb.getRelative(BlockFace.DOWN).getData() == config.getInputColor()))
 					continue;
-				
+
 				if (config.getValidMechanisms().contains(mb.getType()) && !mechanisms.contains(mb))
 					mechanisms.add(mb);
 			}
@@ -100,10 +100,10 @@ public class WoolWire
 
 		if (b.getType().equals(Material.TRAP_DOOR))
 			blockState = (b.getData() & 4) != 0;
-		
+
 		if (b.getType().equals(Material.WOODEN_DOOR) && !((Door) b.getState().getData()).isTopHalf())
-			blockState = (b.getData() & 4) != 0;	
-		
+			blockState = (b.getData() & 4) != 0;
+
 		if (blockState != null)
 		{
 			if (blockState != state)
@@ -118,9 +118,9 @@ public class WoolWire
 	{
 		if (config.getType() == 1)
 			state = !state;
-		
+
 		for (final Block b : mechanisms)
-		{			
+		{
 			if (serverInteract(b, state))
 				continue;
 

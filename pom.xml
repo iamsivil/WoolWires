@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.igp</groupId>
   <artifactId>WoolWires</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
   <name>WoolWires</name>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -65,7 +65,7 @@
   	<dependency>
   		<groupId>com.github.igp</groupId>
   		<artifactId>IGHelpers</artifactId>
-  		<version>0.1-SNAPSHOT</version>
+  		<version>0.2-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>
