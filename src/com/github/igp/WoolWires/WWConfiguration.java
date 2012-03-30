@@ -30,7 +30,9 @@ public class WWConfiguration
 		if ((configFile == null) || !configFile.exists())
 		{
 			plugin.getLogger().info("Configuration file not found: saving default");
-			plugin.saveDefaultConfig();
+			plugin.saveResource("wwconfig.yml", false);
+			final File f = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "wwconfig.yml");
+			f.renameTo(configFile);
 		}
 		
 		config = plugin.getConfig();
@@ -48,10 +50,14 @@ public class WWConfiguration
 
 		{
 			final byte color = -1;
-			final int type = config.getInt("Wires.Default.Type");
-			final int maxSize = config.getInt("Wires.Default.MaxSize");
+			int type = config.getInt("Wires.Default.Type", 0);
+			if ((type < 0) || type > 1)
+				type = 0;
+			int maxSize = config.getInt("Wires.Default.MaxSize", 1024);
+			if (maxSize < 0)
+				maxSize = 1024;
 			List<Material> validMechanisms = new ArrayList<Material>(8);
-			if (config.getString("Wires.Default.Allowed").equalsIgnoreCase("ALL"))
+			if (config.getString("Wires.Default.Allowed", "").equalsIgnoreCase("ALL"))
 				validMechanisms = defaultValidMechanisms();
 			else
 			{
@@ -67,52 +73,55 @@ public class WWConfiguration
 			defaultWireConfiguration = new WireConfiguration(color, type, maxSize, validMechanisms);
 		}
 
-		for (final String s : config.getConfigurationSection("Wires").getKeys(false))
+		if (config.isConfigurationSection("Wires"))
 		{
-			if (s.equalsIgnoreCase("Default"))
-				continue;
-
-			final Byte color = stringToColor(s);
-			if ((color == null) || (color == inputColor))
-				continue;
-			boolean toContinue = false;
-			for (final WireConfiguration wc : wireConfigs)
-			{
-				if (wc.getColor() == color)
-				{
-					toContinue = true;
+			for (final String s : config.getConfigurationSection("Wires").getKeys(false))
+			{				
+				if (s.equalsIgnoreCase("Default"))
 					continue;
-				}
-			}
-			if (toContinue)
-				continue;
-
-			Integer type = config.getInt("Wires." + s + ".Type");
-			if (type == null)
-				type = defaultWireConfiguration.getType();
-
-			Integer maxSize = config.getInt("Wires." + s + ".MaxSize");
-			if (maxSize == null)
-				maxSize = defaultWireConfiguration.getMaxSize();
-
-			List<Material> validMechanisms = new ArrayList<Material>(8);
-			if (config.getString("Wires." + s + ".Allowed").equalsIgnoreCase("ALL"))
-				validMechanisms = defaultValidMechanisms();
-			else
-			{
-				for (final String sm : config.getStringList("Wires." + s + ".Allowed"))
+				
+				final Byte color = stringToColor(s);
+				if (color.equals(null) || (color == inputColor))
+					continue;
+				boolean toContinue = false;
+				for (final WireConfiguration wc : wireConfigs)
 				{
-
-					final Material material = materialHelper.getMaterialFromString(sm);
-					if ((material != null) && !validMechanisms.contains(material))
-						validMechanisms.add(material);
+					if (wc.getColor() == color)
+					{
+						toContinue = true;
+						continue;
+					}
 				}
+				if (toContinue)
+					continue;
+	
+				Integer type = config.getInt("Wires." + s + ".Type", -1);
+				if (type.equals(null) || (type < 0) || (type > 1))
+					type = defaultWireConfiguration.getType();
+	
+				Integer maxSize = config.getInt("Wires." + s + ".MaxSize", -1);
+				if (maxSize.equals(null) || (maxSize < 0))
+					maxSize = defaultWireConfiguration.getMaxSize();
+	
+				List<Material> validMechanisms = new ArrayList<Material>(8);
+				if (config.getString("Wires." + s + ".Allowed").equalsIgnoreCase("ALL"))
+					validMechanisms = defaultValidMechanisms();
+				else
+				{
+					for (final String sm : config.getStringList("Wires." + s + ".Allowed"))
+					{
+	
+						final Material material = materialHelper.getMaterialFromString(sm);
+						if (!material.equals(null) && !validMechanisms.contains(material))
+							validMechanisms.add(material);
+					}
+				}
+	
+				if (validMechanisms.size() == 0)
+					validMechanisms = defaultWireConfiguration.getValidMechanisms();
+	
+				wireConfigs.add(new WireConfiguration(color, type, maxSize, validMechanisms));
 			}
-
-			if (validMechanisms.size() == 0)
-				validMechanisms = defaultWireConfiguration.getValidMechanisms();
-
-			wireConfigs.add(new WireConfiguration(color, type, maxSize, validMechanisms));
 		}
 	}
 
@@ -124,7 +133,7 @@ public class WWConfiguration
 	public WireConfiguration getWireConfiguration(final byte color)
 	{
 		for (final WireConfiguration wc : wireConfigs)
-		{
+		{			
 			if (wc.getColor() == color)
 				return wc;
 		}
@@ -191,6 +200,9 @@ public class WWConfiguration
 
 	private final Byte stringToColor(final String string)
 	{
+		if (string.equals(null))
+			return null;
+		
 		try
 		{
 			final DyeColor color = DyeColor.getByData((byte) Integer.parseInt(string));
