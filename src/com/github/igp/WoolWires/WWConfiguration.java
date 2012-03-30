@@ -25,15 +25,16 @@ public class WWConfiguration
 	{
 		this.plugin = plugin;
 		materialHelper = new MaterialHelper();
-
+		
 		final File configFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "config.yml");
 		if ((configFile == null) || !configFile.exists())
 		{
 			plugin.getLogger().info("Configuration file not found: saving default");
-			plugin.saveDefaultConfig();
+			plugin.saveConfig();
 		}
-
+		
 		config = plugin.getConfig();
+		
 		load();
 	}
 
