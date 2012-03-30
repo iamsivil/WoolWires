@@ -30,7 +30,7 @@ public class WWConfiguration
 		if ((configFile == null) || !configFile.exists())
 		{
 			plugin.getLogger().info("Configuration file not found: saving default");
-			plugin.saveConfig();
+			plugin.saveDefaultConfig();
 		}
 		
 		config = plugin.getConfig();
