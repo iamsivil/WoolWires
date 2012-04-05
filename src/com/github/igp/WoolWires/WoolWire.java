@@ -103,6 +103,10 @@ public class WoolWire
 
 		if (b.getType().equals(Material.WOODEN_DOOR) && !((Door) b.getState().getData()).isTopHalf())
 			blockState = (b.getData() & 4) != 0;
+		
+		if (b.getType().equals(Material.STONE_BUTTON))
+			blockState = (b.getData() & 8) != 0;
+		
 
 		if (blockState != null)
 		{

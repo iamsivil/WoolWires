@@ -10,7 +10,6 @@ import org.bukkit.material.Button;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.PressurePlate;
 import org.bukkit.material.RedstoneWire;
-import org.bukkit.material.RedstoneTorch;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
@@ -50,8 +49,6 @@ public class WWBlockListener implements Listener
 
 		if (sourceBlock.getType().equals(Material.LEVER))
 			inputBlock = sourceBlock.getRelative(((Lever) sourceBlock.getState().getData()).getAttachedFace());
-		else if (sourceBlock.getType().equals(Material.REDSTONE_TORCH_ON) || sourceBlock.getType().equals(Material.REDSTONE_TORCH_OFF))
-			inputBlock = sourceBlock.getRelative(((RedstoneTorch) sourceBlock.getState().getData()).getAttachedFace());
 		else if (sourceBlock.getType().equals(Material.STONE_BUTTON))
 			inputBlock = sourceBlock.getRelative(((Button) sourceBlock.getState().getData()).getAttachedFace());
 		else if (sourceBlock.getType().equals(Material.REDSTONE_WIRE))
@@ -127,16 +124,6 @@ public class WWBlockListener implements Listener
 						return;
 				}
 			}
-
-			if (b.getType().equals(Material.REDSTONE_TORCH_ON) || b.getType().equals(Material.REDSTONE_TORCH_OFF))
-			{
-				if (b.getRelative(((RedstoneTorch) md).getAttachedFace()).equals(inputBlock))
-				{
-					if (((RedstoneTorch) md).isPowered())
-						return;
-				}
-			}
-
 		}
 
 		changeWireState(inputBlock, state);

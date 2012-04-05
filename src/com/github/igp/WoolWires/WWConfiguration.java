@@ -194,6 +194,7 @@ public class WWConfiguration
 		validMechanisms.add(Material.NOTE_BLOCK);
 		validMechanisms.add(Material.DISPENSER);
 		validMechanisms.add(Material.WOODEN_DOOR);
+		validMechanisms.add(Material.STONE_BUTTON);
 
 		return validMechanisms;
 	}
