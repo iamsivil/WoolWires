@@ -71,7 +71,7 @@ public class WWBlockListener implements Listener
 
 			if (!b.equals(sourceBlock))
 			{
-				if (b.getType().equals(Material.LEVER) || b.getType().equals(Material.STONE_BUTTON) || b.getType().equals(Material.REDSTONE_WIRE) || b.getType().equals(Material.REDSTONE_TORCH_ON) || b.getType().equals(Material.REDSTONE_TORCH_OFF))
+				if (b.getType().equals(Material.LEVER) || b.getType().equals(Material.STONE_BUTTON) || b.getType().equals(Material.REDSTONE_WIRE))
 					secondarySourceBlocks.add(b);
 			}
 		}
