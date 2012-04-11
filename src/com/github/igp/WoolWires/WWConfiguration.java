@@ -15,7 +15,6 @@ public class WWConfiguration
 {
 	@SuppressWarnings("unused")
 	private final JavaPlugin plugin;
-	private final MaterialHelper materialHelper;
 	private final FileConfiguration config;
 	private List<WireConfiguration> wireConfigs;
 	private WireConfiguration defaultWireConfiguration;
@@ -24,7 +23,6 @@ public class WWConfiguration
 	public WWConfiguration(final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
-		materialHelper = new MaterialHelper();
 		
 		final File configFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "config.yml");
 		if ((configFile == null) || !configFile.exists())
@@ -63,7 +61,7 @@ public class WWConfiguration
 			{
 				for (final String s : config.getStringList("Wires.Default.Allowed"))
 				{
-					final Material material = materialHelper.getMaterialFromString(s);
+					final Material material = MaterialHelper.getMaterialFromString(s);
 					if ((material != null) && !validMechanisms.contains(material))
 						validMechanisms.add(material);
 				}
@@ -111,7 +109,7 @@ public class WWConfiguration
 					for (final String sm : config.getStringList("Wires." + s + ".Allowed"))
 					{
 	
-						final Material material = materialHelper.getMaterialFromString(sm);
+						final Material material = MaterialHelper.getMaterialFromString(sm);
 						if (!material.equals(null) && !validMechanisms.contains(material))
 							validMechanisms.add(material);
 					}

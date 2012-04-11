@@ -25,13 +25,11 @@ public class WoolWire
 	private int size;
 	private final ArrayList<Block> wire;
 	private final ArrayList<Block> mechanisms;
-	private final BlockFaceHelper blockFaceHelper;
 	private final WireConfiguration config;
 
 	public WoolWire(final Block baseBlock, final WireConfiguration config, final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
-		blockFaceHelper = new BlockFaceHelper();
 		this.baseBlock = baseBlock;
 		this.color = baseBlock.getData();
 		this.config = config;
@@ -48,7 +46,7 @@ public class WoolWire
 	{
 		for (int i = 0; i < wire.size(); i++)
 		{
-			for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
+			for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 			{
 				final Block b = wire.get(i).getRelative(f);
 
@@ -66,7 +64,7 @@ public class WoolWire
 
 		for (final Block b : wire)
 		{
-			for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
+			for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 			{
 				final Block mb = b.getRelative(f);
 

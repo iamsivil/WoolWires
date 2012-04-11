@@ -24,13 +24,11 @@ public class WWBlockListener implements Listener
 {
 	private final JavaPlugin plugin;
 	private final WWConfiguration config;
-	private final BlockFaceHelper blockFaceHelper;
-
+	
 	public WWBlockListener(final JavaPlugin plugin)
 	{
 		this.plugin = plugin;
 		config = new WWConfiguration(plugin);
-		blockFaceHelper = new BlockFaceHelper();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -65,7 +63,7 @@ public class WWBlockListener implements Listener
 
 		final List<Block> secondarySourceBlocks = new ArrayList<Block>(6);
 
-		for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
+		for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 		{
 			final Block b = inputBlock.getRelative(f);
 
@@ -133,7 +131,7 @@ public class WWBlockListener implements Listener
 	{
 		final ArrayList<WoolWire> wires = new ArrayList<WoolWire>(5);
 
-		for (final BlockFace f : blockFaceHelper.getAdjacentFaces())
+		for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 		{
 			final Block b = inputBlock.getRelative(f);
 			Boolean exists = false;
