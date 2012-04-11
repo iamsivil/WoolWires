@@ -13,7 +13,7 @@ import org.bukkit.material.Door;
 import org.bukkit.material.Lever;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGHelpers.BlockFaceHelper;
+import com.github.igp.IGHelpers.Helpers.BlockFaceHelper;
 import com.github.igp.WoolWires.WWConfiguration.WireConfiguration;
 
 public class WoolWire

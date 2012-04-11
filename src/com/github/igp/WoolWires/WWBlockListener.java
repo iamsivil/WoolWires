@@ -18,7 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGHelpers.BlockFaceHelper;
+import com.github.igp.IGHelpers.Helpers.BlockFaceHelper;
 
 public class WWBlockListener implements Listener
 {

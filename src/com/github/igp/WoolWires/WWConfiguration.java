@@ -9,7 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGHelpers.MaterialHelper;
+import com.github.igp.IGHelpers.Helpers.MaterialHelper;
 
 public class WWConfiguration
 {
