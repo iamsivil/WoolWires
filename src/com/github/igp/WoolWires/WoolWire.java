@@ -95,22 +95,18 @@ public class WoolWire
 
 		if (b.getType().equals(Material.LEVER))
 			blockState = (b.getData() & 8) != 0;
-
-		if (b.getType().equals(Material.TRAP_DOOR))
+		else if (b.getType().equals(Material.TRAP_DOOR))
 			blockState = (b.getData() & 4) != 0;
-
-		if (b.getType().equals(Material.WOODEN_DOOR) && !((Door) b.getState().getData()).isTopHalf())
+		else if (b.getType().equals(Material.WOODEN_DOOR) && !((Door) b.getState().getData()).isTopHalf())
 			blockState = (b.getData() & 4) != 0;
-		
-		if (b.getType().equals(Material.STONE_BUTTON))
+		else if (b.getType().equals(Material.STONE_BUTTON))
 			blockState = (b.getData() & 8) != 0;
-		
 
 		if (blockState != null)
 		{
 			if (blockState != state)
-				net.minecraft.server.Block.byId[b.getType().getId()].interact(((CraftWorld) b.getWorld()).getHandle(), b.getX(), b.getY(), b.getZ(), null);
-
+				net.minecraft.server.Block.byId[b.getType().getId()].interact(((CraftWorld)b.getWorld()).getHandle(), b.getX(), b.getY(), b.getZ(), null, 0, 0F, 0F, 0F);
+			
 			return true;
 		}
 		return false;
