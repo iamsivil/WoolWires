@@ -1,20 +1,17 @@
 package com.github.igp.WoolWires;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.github.igp.IGLib.Helpers.MaterialHelper;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.igp.IGLib.Helpers.MaterialHelper;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WWConfiguration
 {
-	@SuppressWarnings("unused")
-	private final JavaPlugin plugin;
 	private final FileConfiguration config;
 	private List<WireConfiguration> wireConfigs;
 	private WireConfiguration defaultWireConfiguration;
@@ -22,15 +19,15 @@ public class WWConfiguration
 
 	public WWConfiguration(final JavaPlugin plugin)
 	{
-		this.plugin = plugin;
-		
+
 		final File configFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "config.yml");
-		if ((configFile == null) || !configFile.exists())
+		if (!configFile.exists())
 		{
 			plugin.getLogger().info("Configuration file not found: saving default");
 			plugin.saveResource("wwconfig.yml", false);
 			final File f = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "wwconfig.yml");
-			f.renameTo(configFile);
+			if (!f.renameTo(configFile))
+				plugin.getLogger().warning("Unable to rename configuration file: please manually rename wwconfig.yml to config.yml and restart the server");
 		}
 		
 		config = plugin.getConfig();
@@ -79,7 +76,7 @@ public class WWConfiguration
 					continue;
 				
 				final Byte color = stringToColor(s);
-				if (color.equals(null) || (color == inputColor))
+				if ((color == null) || (color.equals(inputColor)))
 					continue;
 				boolean toContinue = false;
 				for (final WireConfiguration wc : wireConfigs)
@@ -87,18 +84,18 @@ public class WWConfiguration
 					if (wc.getColor() == color)
 					{
 						toContinue = true;
-						continue;
+						break;
 					}
 				}
 				if (toContinue)
 					continue;
 	
 				Integer type = config.getInt("Wires." + s + ".Type", -1);
-				if (type.equals(null) || (type < 0) || (type > 1))
+				if ((type == null) || (type < 0) || (type > 1))
 					type = defaultWireConfiguration.getType();
 	
 				Integer maxSize = config.getInt("Wires." + s + ".MaxSize", -1);
-				if (maxSize.equals(null) || (maxSize < 0))
+				if ((maxSize == null) || (maxSize < 0))
 					maxSize = defaultWireConfiguration.getMaxSize();
 	
 				List<Material> validMechanisms = new ArrayList<Material>(8);
@@ -110,7 +107,7 @@ public class WWConfiguration
 					{
 	
 						final Material material = MaterialHelper.getMaterialFromString(sm);
-						if (!material.equals(null) && !validMechanisms.contains(material))
+						if ((material != null) && !validMechanisms.contains(material))
 							validMechanisms.add(material);
 					}
 				}
@@ -180,7 +177,7 @@ public class WWConfiguration
 		}
 	}
 
-	private final List<Material> defaultValidMechanisms()
+	private List<Material> defaultValidMechanisms()
 	{
 		final List<Material> validMechanisms = new ArrayList<Material>(8);
 
@@ -197,9 +194,9 @@ public class WWConfiguration
 		return validMechanisms;
 	}
 
-	private final Byte stringToColor(final String string)
+	private Byte stringToColor(final String string)
 	{
-		if (string.equals(null))
+		if (string.isEmpty())
 			return null;
 		
 		try
@@ -208,7 +205,7 @@ public class WWConfiguration
 			if (color != null)
 				return color.getData();
 		}
-		catch (final NumberFormatException ex)
+		catch (final NumberFormatException ignore)
 		{
 		}
 
