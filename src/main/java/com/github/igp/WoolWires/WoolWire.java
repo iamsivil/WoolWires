@@ -66,11 +66,11 @@ class WoolWire
 				switch (mb.getType())
 				{
 					case LEVER:
-						if (b != mb.getRelative(((Lever)mb.getState().getData()).getAttachedFace()))
+						if (!mb.getRelative(((Lever)mb.getState().getData()).getAttachedFace()).equals(b))
 							continue;
 						break;
 					case STONE_BUTTON:
-						if (b != mb.getRelative(((Button)mb.getState().getData()).getAttachedFace()))
+						if (!mb.getRelative(((Button)mb.getState().getData()).getAttachedFace()).equals(b))
 							continue;
 						break;
 				}

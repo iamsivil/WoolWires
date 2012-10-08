@@ -11,7 +11,6 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.material.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 class WWBlockListener implements Listener
 {
@@ -25,7 +24,7 @@ class WWBlockListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onBlockRedstoneChanged(final BlockRedstoneEvent event)
 	{
-		final Boolean state;
+		Boolean state;
 		if ((event.getNewCurrent() == 0) && (event.getOldCurrent() != 0))
 			state = false;
 		else if ((event.getNewCurrent() != 0) && (event.getOldCurrent() == 0))
@@ -44,15 +43,21 @@ class WWBlockListener implements Listener
 			case STONE_BUTTON:
 				inputBlock = sourceBlock.getRelative(((Button) sourceBlock.getState().getData()).getAttachedFace());
 				break;
-			//TODO: Allow for both redstone_wire from any side, and redstone torch/diode detection
+			case TRIPWIRE_HOOK:
+				//TODO: Better way of doing this?  CB needs an update for this, also pretty slow
+				state = ((TripwireHook) sourceBlock.getState().getData()).isActivated();
+				inputBlock = sourceBlock.getRelative(((TripwireHook) sourceBlock.getState().getData()).getAttachedFace());
+				break;
+			//TODO: Figure out how to do diode detection | Diodes don't fire BlockRedstoneEvent
 			//case DIODE:
 			//case DIODE_BLOCK_OFF:
 			//case DIODE_BLOCK_ON:
-			//case REDSTONE_TORCH_OFF:
-			//case REDSTONE_TORCH_ON:
-			case REDSTONE_WIRE:
-				inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+			case REDSTONE_TORCH_OFF:
+			case REDSTONE_TORCH_ON:
+				inputBlock = sourceBlock.getRelative(BlockFace.UP);
 				break;
+			//TODO: Allow for both redstone_wire from any side
+			case REDSTONE_WIRE:
 			case WOOD_PLATE:
 			case STONE_PLATE:
 			case DETECTOR_RAIL:
@@ -65,68 +70,61 @@ class WWBlockListener implements Listener
 		if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
 			return;
 
-		if (!state)
+		for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 		{
-			final List<Block> secondarySourceBlocks = new ArrayList<Block>(6);
+			final Block b = inputBlock.getRelative(f);
 
-			for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
+			if (!b.equals(sourceBlock))
 			{
-				final Block b = inputBlock.getRelative(f);
-
-				if (!b.equals(sourceBlock))
+				switch (b.getType())
 				{
-					if (b.getType().equals(Material.LEVER) || b.getType().equals(Material.STONE_BUTTON) || b.getType().equals(Material.REDSTONE_WIRE))
-						secondarySourceBlocks.add(b);
-				}
-			}
-
-			for (final Block b : secondarySourceBlocks)
-			{
-				if (b.getType().equals(Material.REDSTONE_WIRE))
-				{
-					if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
-					{
-						if (((RedstoneWire) b.getState().getData()).isPowered())
+					case REDSTONE_WIRE:
+						if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
+						{
+							if (((RedstoneWire) b.getState().getData()).isPowered())
+								return;
+						}
+						break;
+					case REDSTONE_TORCH_ON:
+						if (b.getRelative(BlockFace.UP).equals(inputBlock))
 							return;
-					}
-				}
-
-				if (b.getType().equals(Material.WOOD_PLATE) || b.getType().equals(Material.STONE_PLATE))
-				{
-					if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
-					{
-						if (((PressurePlate) b.getState().getData()).isPressed())
-							return;
-					}
-				}
-
-				if (b.getType().equals(Material.DETECTOR_RAIL))
-				{
-					if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
-					{
-						if (((DetectorRail) b.getState().getData()).isPressed())
-							return;
-					}
-				}
-
-				final MaterialData md = b.getState().getData();
-
-				if (b.getType().equals(Material.LEVER))
-				{
-					if (b.getRelative(((Lever) md).getAttachedFace()).equals(inputBlock))
-					{
-						if (((Lever) md).isPowered())
-							return;
-					}
-				}
-
-				if (b.getType().equals(Material.STONE_BUTTON))
-				{
-					if (b.getRelative(((Button) md).getAttachedFace()).equals(inputBlock))
-					{
-						if (((Button) md).isPowered())
-							return;
-					}
+						break;
+					case WOOD_PLATE:
+					case STONE_PLATE:
+						if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
+						{
+							if (((PressurePlate) b.getState().getData()).isPressed())
+								return;
+						}
+						break;
+					case DETECTOR_RAIL:
+						if (b.getRelative(BlockFace.DOWN).equals(inputBlock))
+						{
+							if (((DetectorRail) b.getState().getData()).isPressed())
+								return;
+						}
+						break;
+					case LEVER:
+						if (b.getRelative(((Lever) b.getState().getData()).getAttachedFace()).equals(inputBlock))
+						{
+							if (((Lever) b.getState().getData()).isPowered())
+								return;
+						}
+						break;
+					case STONE_BUTTON:
+						if (b.getRelative(((Button) b.getState().getData()).getAttachedFace()).equals(inputBlock))
+						{
+							if (((Button) b.getState().getData()).isPowered())
+								return;
+						}
+						break;
+					case TRIPWIRE_HOOK:
+						if (b.getRelative(((TripwireHook) b.getState().getData()).getAttachedFace()).equals(inputBlock))
+						{
+							if (((TripwireHook) b.getState().getData()).isPowered())
+								return;
+						}
+						break;
 				}
 			}
 		}
@@ -164,5 +162,4 @@ class WWBlockListener implements Listener
 		for (final WoolWire wire : wires)
 			wire.setMechanismState(state);
 	}
-
 }
