@@ -1,6 +1,7 @@
 package com.github.igp.WoolWires;
 
 import com.github.igp.IGLib.Helpers.BlockFaceHelper;
+import com.github.igp.IGLib.Helpers.BlockHelper;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -33,42 +34,76 @@ class WWBlockListener implements Listener
 			return;
 
 		final Block sourceBlock = event.getBlock();
-		final Block inputBlock;
+		Block inputBlock = null;
 
 		switch (sourceBlock.getType())
 		{
 			case LEVER:
 				inputBlock = sourceBlock.getRelative(((Lever) sourceBlock.getState().getData()).getAttachedFace());
+				if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
+					return;
 				break;
 			case STONE_BUTTON:
 				inputBlock = sourceBlock.getRelative(((Button) sourceBlock.getState().getData()).getAttachedFace());
+				if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
+					return;
 				break;
 			case TRIPWIRE_HOOK:
-				//TODO: Better way of doing this?  CB needs an update for this, also pretty slow
-				state = ((TripwireHook) sourceBlock.getState().getData()).isActivated();
+				//TODO: CraftBukkit events for TripwireHook bugged | only 1 hook fires, need workaround or fix
 				inputBlock = sourceBlock.getRelative(((TripwireHook) sourceBlock.getState().getData()).getAttachedFace());
+				state = ((TripwireHook) sourceBlock.getState().getData()).isActivated();
 				break;
-			//TODO: Figure out how to do diode detection | Diodes don't fire BlockRedstoneEvent
+			//TODO: Figure out how to do diode detection | Diodes don't fire BlockRedstoneEvent, CB update needed?
 			//case DIODE:
 			//case DIODE_BLOCK_OFF:
 			//case DIODE_BLOCK_ON:
 			case REDSTONE_TORCH_OFF:
 			case REDSTONE_TORCH_ON:
 				inputBlock = sourceBlock.getRelative(BlockFace.UP);
+				if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
+					return;
 				break;
-			//TODO: Allow for both redstone_wire from any side
+			//TODO: Cleanup, figure out detection from powered solid blocks (blocks don't fire BlockRedstoneEvent)
 			case REDSTONE_WIRE:
+				if (sourceBlock.getRelative(BlockFace.DOWN).getType().equals(Material.WOOL))
+				{
+					if (sourceBlock.getRelative(BlockFace.DOWN).getData() == config.getInputColor())
+					{
+						inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+						break;
+					}
+				}
+				for (final BlockFace f : BlockFaceHelper.getFlatAdjacentFaces())
+				{
+					final Block b = sourceBlock.getRelative(f);
+					if (b.getType().equals(Material.WOOL) && b.getData() == config.getInputColor())
+					{
+						final Block c = sourceBlock.getRelative(f.getOppositeFace());
+						if (BlockHelper.blockRedstoneRelated(c))
+						{
+							if (BlockHelper.blockRedstoneRelated(sourceBlock.getRelative(BlockFaceHelper.getRotatePlus90Face(f))) ||
+								BlockHelper.blockRedstoneRelated(sourceBlock.getRelative(BlockFaceHelper.getRotateNeg90Face(f))))
+							{
+								return;
+							}
+							inputBlock = b;
+							break;
+						}
+					}
+				}
+				if (inputBlock == null)
+					return;
+				break;
 			case WOOD_PLATE:
 			case STONE_PLATE:
 			case DETECTOR_RAIL:
 				inputBlock = sourceBlock.getRelative(BlockFace.DOWN);
+				if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
+					return;
 				break;
 			default:
 				return;
 		}
-
-		if (!(inputBlock.getType().equals(Material.WOOL) && (inputBlock.getData() == config.getInputColor())))
-			return;
 
 		for (final BlockFace f : BlockFaceHelper.getAdjacentFaces())
 		{
